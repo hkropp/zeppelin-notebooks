@@ -1,0 +1,278 @@
+{
+  "paragraphs": [
+    {
+      "text": "%md\n# Fitbit Notebook\n\nThis is a sample Zeppelin notebook for getting activity records from a fitbit account.\n\n### Authorization\nYou need to get authorization code to furhter proceed.\n[https://www.fitbit.com/oauth2/authorize?response_type\u003dcode\u0026client_id\u003d227P25\u0026redirect_uri\u003dhttp%3A%2F%2Fhenning.kropponline.de\u0026scope\u003dactivity](https://www.fitbit.com/oauth2/authorize?response_type\u003dcode\u0026client_id\u003d227P25\u0026redirect_uri\u003dhttp%3A%2F%2Fhenning.kropponline.de\u0026scope\u003dactivity)\n\nCopy the code from the address line of your browser, for example: [http://henning.kropponline.de/?code\u003d78dc0adf7f4123d80b7x31c8f7446f337e0f4ad#successs](http://henning.kropponline.de/?code\u003d78dc0adf7f4123d80b7x31c8f7446f337e0f4ad#successs) contains the code __*78dc0adf7f4123d80b7x31c8f7446f337e0f4ad*__\n\n### Resources\nPlease read this for some background: [http://henning.kropponline.de/2016/03/27/access-to-fitbit-api-with-scala/](http://henning.kropponline.de/2016/03/27/access-to-fitbit-api-with-scala/)\n\n\n\n",
+      "authenticationInfo": {},
+      "dateUpdated": "Apr 3, 2016 11:35:26 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459678733608_-1768862634",
+      "id": "20160403-101853_585299394",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch1\u003eFitbit Notebook\u003c/h1\u003e\n\u003cp\u003eThis is a sample Zeppelin notebook for getting activity records from a fitbit account.\u003c/p\u003e\n\u003ch3\u003eAuthorization\u003c/h3\u003e\n\u003cp\u003eYou need to get authorization code to furhter proceed.\n\u003cbr  /\u003e\u003ca href\u003d\"https://www.fitbit.com/oauth2/authorize?response_type\u003dcode\u0026amp;client_id\u003d227P25\u0026amp;redirect_uri\u003dhttp%3A%2F%2Fhenning.kropponline.de\u0026amp;scope\u003dactivity\"\u003ehttps://www.fitbit.com/oauth2/authorize?response_type\u003dcode\u0026amp;client_id\u003d227P25\u0026amp;redirect_uri\u003dhttp%3A%2F%2Fhenning.kropponline.de\u0026amp;scope\u003dactivity\u003c/a\u003e\u003c/p\u003e\n\u003cp\u003eCopy the code from the address line of your browser, for example: \u003ca href\u003d\"http://henning.kropponline.de/?code\u003d78dc0adf7f4123d80b7x31c8f7446f337e0f4ad#successs\"\u003ehttp://henning.kropponline.de/?code\u003d78dc0adf7f4123d80b7x31c8f7446f337e0f4ad#successs\u003c/a\u003e contains the code \u003cstrong\u003e\u003cem\u003e78dc0adf7f4123d80b7x31c8f7446f337e0f4ad\u003c/em\u003e\u003c/strong\u003e\u003c/p\u003e\n\u003ch3\u003eResources\u003c/h3\u003e\n\u003cp\u003ePlease read this for some background: \u003ca href\u003d\"http://henning.kropponline.de/2016/03/27/access-to-fitbit-api-with-scala/\"\u003ehttp://henning.kropponline.de/2016/03/27/access-to-fitbit-api-with-scala/\u003c/a\u003e\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 3, 2016 10:18:53 AM",
+      "dateStarted": "Apr 3, 2016 11:35:26 AM",
+      "dateFinished": "Apr 3, 2016 11:35:26 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Loading Dependencies",
+      "text": "%dep\nz.load(\"org.scalaj:scalaj-http_2.10:2.2.1\")\nz.load(\"org.json4s:json4s-native_2.10:3.2.11\")\n\n\n",
+      "authenticationInfo": {},
+      "dateUpdated": "Apr 7, 2016 9:40:12 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459679096676_-368623469",
+      "id": "20160403-102456_54462055",
+      "dateCreated": "Apr 3, 2016 10:24:56 AM",
+      "dateStarted": "Apr 6, 2016 7:33:29 PM",
+      "dateFinished": "Apr 6, 2016 7:33:42 PM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Getting Authentication Token",
+      "text": "%spark\nimport org.json4s.{DefaultFormats, JString}\nimport org.json4s.JsonAST.{JArray, JObject}\nimport scalaj.http.{Http, Token, HttpResponse}\nimport org.json4s.native.JsonMethods._\n\nvar access_token:String \u003d \"\"\nvar refresh_token:String \u003d \"\"\nvar user_id:String \u003d \"\"\nval app_name:String \u003d \"hk-scala-test\"\nval app_client_id:String \u003d \"XXXX\"\nval app_client_secret:String \u003d \"xxxxxxxxxxxxxxxxxxx\"\n\nval client_cred:String \u003d java.util.Base64.getEncoder\n      .encodeToString(s\"$app_client_id:$app_client_secret\".getBytes)\n\n// Provide the token from the fitbit authorize request here\nval token:String \u003d \"c488a46f5a3aeb0efce46e8f72ecabea09cfecfa\"\n\nval response: HttpResponse[String] \u003d Http(\"https://api.fitbit.com/oauth2/token\")\n      .headers(Seq(\"Authorization\" -\u003e s\"Basic $client_cred\",\n                   \"Content-Type\" -\u003e \"application/x-www-form-urlencoded\"))\n      .postForm(Seq(\"name\" -\u003e \"jon\",\n                    \"client_id\" -\u003e app_client_id,\n                    \"grant_type\" -\u003e \"authorization_code\",\n                    \"redirect_uri\" -\u003e \"http://henning.kropponline.de\",\n                    \"code\" -\u003e token)\n      ).asString\n\nval jsonResponse \u003d parse(response.body)\nval JString(access_token) \u003d jsonResponse \\ \"access_token\"\nval JString(refresh_token) \u003d jsonResponse \\ \"refresh_token\"\nval JString(user_id) \u003d jsonResponse \\ \"user_id\"\n",
+      "authenticationInfo": {},
+      "dateUpdated": "Apr 7, 2016 10:03:07 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "editorHide": false,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459683344605_-999777539",
+      "id": "20160403-113544_343809187",
+      "dateCreated": "Apr 3, 2016 11:35:44 AM",
+      "dateStarted": "Apr 6, 2016 7:43:13 PM",
+      "dateFinished": "Apr 6, 2016 7:43:19 PM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Fetch Activity Steps Data of Last 3 Month",
+      "text": "%spark\n\ncase class Steps(dateTime:String, value:String)\ncase class ActivitiesStep(`activities-steps`: Seq[Steps])\n\nval response: HttpResponse[String] \u003d\n      Http(s\"https://api.fitbit.com/1/user/$user_id/activities/steps/date/today/3m.json\")\n        .headers(\"Authorization\" -\u003e s\"Bearer $access_token\")\n        .asString\n        \nval jsonResponse \u003d parse(response.body)\nimplicit val formats \u003d DefaultFormats\n\nval activitiesStep \u003d jsonResponse.extract[ActivitiesStep]",
+      "authenticationInfo": {},
+      "dateUpdated": "Apr 7, 2016 9:50:28 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "lineChart",
+          "height": 300.0,
+          "optionOpen": true,
+          "keys": [
+            {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Steps2",
+              "index": 2.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Steps",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459685949304_-289695594",
+      "id": "20160403-121909_1840625864",
+      "dateCreated": "Apr 3, 2016 12:19:09 PM",
+      "dateStarted": "Apr 6, 2016 8:30:18 PM",
+      "dateFinished": "Apr 6, 2016 8:30:21 PM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Visualization the Activity Steps",
+      "text": "%spark\nprintln(\"%table Date\\tSteps\\tSteps2\")\nactivitiesStep.`activities-steps`.foreach( x \u003d\u003e \n    println(s\"${x.dateTime}\\t${x.value.toInt}\\t${x.value.toInt-20}\")\n)",
+      "authenticationInfo": {},
+      "dateUpdated": "Apr 7, 2016 9:52:42 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 292.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Steps",
+              "index": 1.0,
+              "aggr": "sum"
+            },
+            {
+              "name": "Steps2",
+              "index": 2.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Steps",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          },
+          "lineWithFocus": false,
+          "forceY": false
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459686506173_-1437056209",
+      "id": "20160403-122826_585358202",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Date\tSteps\tSteps2\n2016-01-05\t12473\t12453\n2016-01-06\t15789\t15769\n2016-01-07\t9867\t9847\n2016-01-08\t7548\t7528\n2016-01-09\t11015\t10995\n2016-01-10\t7568\t7548\n2016-01-11\t13441\t13421\n2016-01-12\t10782\t10762\n2016-01-13\t14260\t14240\n2016-01-14\t6969\t6949\n2016-01-15\t9750\t9730\n2016-01-16\t14700\t14680\n2016-01-17\t10413\t10393\n2016-01-18\t19444\t19424\n2016-01-19\t6001\t5981\n2016-01-20\t6536\t6516\n2016-01-21\t6838\t6818\n2016-01-22\t5949\t5929\n2016-01-23\t0\t-20\n2016-01-24\t1142\t1122\n2016-01-25\t12419\t12399\n2016-01-26\t16139\t16119\n2016-01-27\t11466\t11446\n2016-01-28\t10529\t10509\n2016-01-29\t6976\t6956\n2016-01-30\t8209\t8189\n2016-01-31\t6775\t6755\n2016-02-01\t11299\t11279\n2016-02-02\t11362\t11342\n2016-02-03\t12704\t12684\n2016-02-04\t11116\t11096\n2016-02-05\t6535\t6515\n2016-02-06\t27\t7\n2016-02-07\t8249\t8229\n2016-02-08\t14759\t14739\n2016-02-09\t10568\t10548\n2016-02-10\t8396\t8376\n2016-02-11\t7408\t7388\n2016-02-12\t6971\t6951\n2016-02-13\t8532\t8512\n2016-02-14\t12564\t12544\n2016-02-15\t12767\t12747\n2016-02-16\t10597\t10577\n2016-02-17\t10070\t10050\n2016-02-18\t15864\t15844\n2016-02-19\t17730\t17710\n2016-02-20\t6873\t6853\n2016-02-21\t6836\t6816\n2016-02-22\t11275\t11255\n2016-02-23\t15327\t15307\n2016-02-24\t9722\t9702\n2016-02-25\t8271\t8251\n2016-02-26\t9782\t9762\n2016-02-27\t0\t-20\n2016-02-28\t1450\t1430\n2016-02-29\t11156\t11136\n2016-03-01\t10427\t10407\n2016-03-02\t10683\t10663\n2016-03-03\t14011\t13991\n2016-03-04\t8084\t8064\n2016-03-05\t15718\t15698\n2016-03-06\t2453\t2433\n2016-03-07\t11496\t11476\n2016-03-08\t6166\t6146\n2016-03-09\t12101\t12081\n2016-03-10\t7404\t7384\n2016-03-11\t8003\t7983\n2016-03-12\t11009\t10989\n2016-03-13\t3988\t3968\n2016-03-14\t14335\t14315\n2016-03-15\t11959\t11939\n2016-03-16\t17338\t17318\n2016-03-17\t9436\t9416\n2016-03-18\t8940\t8920\n2016-03-19\t9704\t9684\n2016-03-20\t4245\t4225\n2016-03-21\t10244\t10224\n2016-03-22\t10945\t10925\n2016-03-23\t8990\t8970\n2016-03-24\t6688\t6668\n2016-03-25\t9157\t9137\n2016-03-26\t16027\t16007\n2016-03-27\t6748\t6728\n2016-03-28\t11033\t11013\n2016-03-29\t11521\t11501\n2016-03-30\t13673\t13653\n2016-03-31\t10234\t10214\n2016-04-01\t7355\t7335\n2016-04-02\t13548\t13528\n2016-04-03\t9105\t9085\n2016-04-04\t12653\t12633\n2016-04-05\t12059\t12039\n2016-04-06\t49\t29\n"
+      },
+      "dateCreated": "Apr 3, 2016 12:28:26 PM",
+      "dateStarted": "Apr 6, 2016 8:30:32 PM",
+      "dateFinished": "Apr 6, 2016 8:30:33 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+      "dateUpdated": "Apr 6, 2016 8:39:15 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459974632282_-813088172",
+      "id": "20160406-203032_868530198",
+      "dateCreated": "Apr 6, 2016 8:30:32 PM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Fitbit",
+  "id": "2BFTUS14T",
+  "angularObjects": {
+    "2BE54QUQF": [],
+    "2BC2GNV6P": [],
+    "2BE3U7KKN": [],
+    "2BBVDDAEU": [],
+    "2BC5NFSBJ": [],
+    "2BE3RPYAG": [],
+    "2BC9Z3TQ2": [],
+    "2BC3UQA39": [],
+    "2BEEE47TM": [],
+    "2BEGBZSNB": [],
+    "2BB9X51X3": [],
+    "2BBXACXKK": [],
+    "2BDU7PUS5": [],
+    "2BCPQSQAE": [],
+    "2BBMFYFMH": [],
+    "2BBAQ4HHT": []
+  },
+  "config": {},
+  "info": {}
+}
